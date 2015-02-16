@@ -118,7 +118,7 @@ The new dataset functionality will be in the DatasetManager extension, associate
 
 \section{Current Status}
 
-In DIRAC middleware, there already is a very simple DatasetManager. I will revise the work, that was done, and extend it, so that it satisfies the needs of the Auger experiment. Current state will be mentioned in detail in section 4. 
+In DIRAC middleware, there already is a very simple DatasetManager. I will revise the work, that was done, and extend it, so that it satisfies the needs of the Auger experiment. Current state will be mentioned in detail in section 3. 
 
 
 \section{Features}
@@ -136,11 +136,73 @@ The required features are:
 \end{enumerate}
 
 
-
 \section{Design and Implementation Constraints}
 The task of this work is not to modify any existing FileCatalog functionality other, than the DatasetManager.It can only suggest and test improvements on the MySQL database, that will improve with dataset functionality. The user interface will be focused on the CLI, web interface will not be a part of this work.
 
 
+\chapter{User Interface}
+To work with datasets, user must have the DIRAC client installed. There will be two ways, to access dataset functionality
+\begin{itemize}
+\item With the FileCatalog CLI
+\item With independent commands
+\end{itemize}
+The focus will be set on interactive behavior, none of the commands shall take more than a few seconds to complete. 
+
+
+\section{FileCatalog CLI}
+There already is a dataset command in the CLI, which behaves according to the first parameter it gets. 
+
+\subsection{dataset add}
+\texttt{dataset add <dataset_name> <meta_query>} \\
+Make a new dataset from files, returned by the metaquery, or will throw a meaningful error, if it fails.  I will add a \texttt{-f} option, that will instantly freeze the new dataset. This command is already developed, but in need of revision.
+
+\subsection{dataset annotate} 
+\texttt{dataset annotate <dataset_name> <annotation>}  \\
+Add annotation to a already existing dataset. This command is already developed, but in need of revision.
+
+\subsection{dataset show}
+\texttt{dataset show [-l] <dataset_name>} \\
+Show existing datasets. The \texttt{-l} option enables long output. This command is already developed.
+               
+\subsection{dataset status}
+\texttt{dataset status <dataset_name>} \\
+Display the dataset status. The functionality is similar to \texttt{dataset show -l}, but it shows only information about one dataset. This command is already developed, but in need of revision.
+
+\subsection{dataset files}
+\texttt{dataset files <dataset_name>} \\
+Show dataset files. This command is already developed, but in need of revision.
+
+\subsection{dataset remove}
+\texttt{dataset remove <dataset_name>} \\
+Remove dataset. In case of dynamic dataset, the removal will only affect the dataset declaration, not its files. This command is already developed. In case of frozen dataset, the command will have to cross-reference other frozen datasets and the FileCatalog, then remove files owned only by the dataset specified by the second parameter.
+
+\subsection{dataset check}
+\texttt{dataset check <dataset_name>} \\
+This command is already developed, but deprecated.
+
+\subsection{dataset update}
+\texttt{dataset update <dataset_name>} \\
+This command is already developed, but deprecated.
+
+\subsection{dataset freeze}
+\texttt{dataset freeze <dataset_name>} \\
+Change a dynamic dataset into a frozen dataset. This command is already developed, but in need of revision.  
+
+\subsection{dataset release}
+\texttt{dataset release <dataset_name>} \\
+Change a frozen dataset into a dynamic dataset. This command is already developed, but in need of revision.  
+
+\subsection{dataset replicate}
+\texttt{dataset replicate <dataset_name> [-n num] <SE> [<SourceSE>]} \\
+Replicate the dataset to a given storage element. If the \texttt{-n} option is specified, the following number will indicate the percentual part of the dataset, that should be replicated.
+
+\subsection{dataset download}
+\texttt{dataset download <dataset_name> [-n num]} \\
+Downloads the wanted dataset to the users local disk. If the \texttt{-n} option is specified, the following number will indicate the percentual part of the dataset, that should be downloaded.
+
+
+\section{Independent commands}
+Independent command wil take the form of \texttt{dirac-dms-dataset-CMD}, where \texttt{CMD} will be replaced with the first parameter, of the dataset command from the FileCatalog CLI. 
 
 \newpage
 %\pagebreak 
