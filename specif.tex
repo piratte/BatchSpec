@@ -1,0 +1,105 @@
+\documentclass{scrreprt}
+\usepackage{listings}
+\usepackage{underscore}
+\usepackage[bookmarks=true]{hyperref}
+\hypersetup{
+    bookmarks=false,    % show bookmarks bar?
+    pdftitle={Software Requirement Specification},    % title
+    pdfauthor={Yiannis Lazarides},                     % author
+    pdfsubject={TeX and LaTeX},                        % subject of the document
+    pdfkeywords={TeX, LaTeX, graphics, images}, % list of keywords
+    colorlinks=true,       % false: boxed links; true: colored links
+    linkcolor=blue,       % color of internal links
+    citecolor=black,       % color of links to bibliography
+    filecolor=black,        % color of file links
+    urlcolor=purple,        % color of external links
+    linktoc=page            % only page is linked
+}%
+\def\myversion{1.0 }
+\title{%
+\flushright
+\rule{16cm}{5pt}\vskip1cm
+\Huge{SOFTWARE REQUIREMENTS\\ SPECIFICATION}\\
+\vspace{2cm}
+for\\
+\vspace{1cm}
+Dataset implementation in the DIRAC middleware\\
+\vspace{1cm}
+%\LARGE{Release 1.0\\}
+\vspace{2cm}
+\LARGE{Implementing dataset operations in the DIRAC middleware based on dataset definition provided by the Auger project group and adding respective commands to the File Catalog CLI.\\}
+\vspace{2cm}
+by Martin ADAM\\
+\vfill
+\rule{16cm}{5pt}
+}
+\date{}
+\usepackage{hyperref}
+\begin{document}
+\maketitle
+\tableofcontents
+%\chapter*{Revision History}
+\chapter{Introduction}
+The DIRAC (Distributed Infrastructure with Remote Agent Control) project is a complete Grid solution for a medium sized scientifical community. DIRAC forms a layer between users and various compute resources to allow optimized, transparent and reliable usage. The DIRAC architecture consists of numerous cooperating Distributed Services and Light Agents built within the same DISET framework following the Grid security standards. Besides the efficient Workload Management Systems, which introduced the now widely used concept of Pilot Agent, DIRAC also offers a versatile Data Management System (DMS) which is optimized for reliable data transfers. 
+
+The task of this project is to add dataset support to the DIRAC DMS.
+\section{Purpose}
+Once the dataset features will be implemented in DIRAC, it will have all the functionality to satisfy the needs of the Auger experiment computing model, so Auger will start using DIRAC as it's midleware software solution.
+\section{Used Technologies}
+
+\begin{itemize}
+\item The main programming language of the DIRAC project is python, so I have to use it for the main part of my work
+\item Database functionality relies on MySQL
+\item Communication between components is done by the DISET protocol, implmenting RPC.
+\end{itemize}
+\section{References}
+\begin{itemize}
+\item Dirac official pages (http://diracgrid.org/)
+\item Dirac source code repository (https://github.com/DIRACGrid/DIRAC)
+\end{itemize}
+\chapter{Overall Description}
+\section{Product Perspective}
+DIRAC components can be grouped in to 5 categories: 
+\begin{itemize}
+\item Commands
+\item Services
+\item Databases
+\item Agents
+\item Executors
+\end{itemize}
+
+\subsection{Commands}
+Commands are one of the main interface tools for the users. Usually a command is a script, that contacts the server side, and executes the action it was designed for (e.g. upload file and register it in the File Catalog). Other UI functionality is provided by the web interface.
+
+\subsection{Services}
+Services are the main back-end component. A service provides a layer between the client running a command, and the Databases/Resources it is using. Example of a service is the FileCatalog, or the SystemAdministrator (which provides a server side of the System Administrator CLI, used for managing services running at a particular server).
+
+\subsection{Databases}
+Databases are the MySQL database structures, designed for specific purposes, so that when installing a database for e.g. FileCatalog, you don't have to install one used for e.g. JobLogging.
+
+\subsection{Agents}
+Agents are active software components which run as independent processes to fulfill one or several system functions. Agents are processes that perform actions periodically. Each cycle agents typically contact a service or look into a DB to check for pending actions, execute the required ones and report back the results. 
+
+\subsection{Executors}
+The Executor framework is designed around two components. The Executor Mind knows how to retrieve, store and dispatch tasks. And Executors are the working processes that know what to do depending on the task type. Each Executor is an independent process that connects to the Mind and waits for tasks to be sent to them by the Mind.
+
+\section{Current Status}
+
+In DIRAC middleware, there already is a very simple dataset manager. I will revise the work, that was done, and extend it, so that it satisfies the needs of the Auger experiment. Current state will be mentioned in detail in section 4. 
+
+\section{Features}
+
+The required features are:
+
+\begin{enumerate}
+\item cus
+\end{enumerate}
+
+\begin{description}
+\item[1] neco
+\end{description}
+
+
+\section{User Classes and Characteristics}
+% add other chapters and sections to suit
+\end{document}
