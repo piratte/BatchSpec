@@ -40,66 +40,115 @@ by Martin ADAM\\
 \tableofcontents
 %\chapter*{Revision History}
 \chapter{Introduction}
-The DIRAC (Distributed Infrastructure with Remote Agent Control) project is a complete Grid solution for a medium sized scientifical community. DIRAC forms a layer between users and various compute resources to allow optimized, transparent and reliable usage. The DIRAC architecture consists of numerous cooperating Distributed Services and Light Agents built within the same DISET framework following the Grid security standards. Besides the efficient Workload Management Systems, which introduced the now widely used concept of Pilot Agent, DIRAC also offers a versatile Data Management System (DMS) which is optimized for reliable data transfers. 
+The DIRAC (Distributed Infrastructure with Remote Agent Control) project is a complete Grid solution for a medium sized scientific community. DIRAC forms a layer between users and various compute resources to allow optimized, transparent and reliable usage. The DIRAC architecture consists of numerous cooperating Distributed Services and Light Agents built within the same DISET framework following the Grid security standards. Besides the efficient Workload Management Systems, which introduced the now widely used concept of Pilot Agent, DIRAC also offers a versatile Data Management System (DMS) which is optimized for reliable data transfers. 
 
 The task of this project is to add dataset support to the DIRAC DMS.
+
+
 \section{Purpose}
-Once the dataset features will be implemented in DIRAC, it will have all the functionality to satisfy the needs of the Auger experiment computing model, so Auger will start using DIRAC as it's midleware software solution.
+Once the dataset features will be implemented in DIRAC, it will have all the functionality to satisfy the needs of the Auger experiment computing model, so Auger will start using DIRAC as it's middleware software solution.
+
+
 \section{Used Technologies}
 
 \begin{itemize}
 \item The main programming language of the DIRAC project is python, so I have to use it for the main part of my work
 \item Database functionality relies on MySQL
-\item Communication between components is done by the DISET protocol, implmenting RPC.
+\item Communication between components is done by the DISET protocol, implementing RPC.
 \end{itemize}
+
+
 \section{References}
 \begin{itemize}
 \item Dirac official pages (http://diracgrid.org/)
 \item Dirac source code repository (https://github.com/DIRACGrid/DIRAC)
 \end{itemize}
+
+
+\section{Definitions}
+\begin{description}
+\item[Dataset] is a set of files with some common features (files returned by a particular metadata query). In our context, we have frozen and dynamic datasets.
+\item[Dynamic dataset] is a set of files, where the files are not bound to the dataset in any way. Thus, when someone removes, changes or deletes a file, the dataset changes without giving any further notice.
+\item[Frozen dataset] is a set of files, which are fixed and cannot be changed, unless the dataset is released (melted).
+\item[Metadata] is the information describing the user data in order to easily select the file sets of interest for user applications.
+\end{description}
+
+
+\section{Conventions}
+This document features some terminology which readers may be unfamiliar with. See Appendix A (Glossary) for a list of these terms and their definitions. 
+
+
+
 \chapter{Overall Description}
+
+
 \section{Product Perspective}
 DIRAC components can be grouped in to 5 categories: 
-\begin{itemize}
-\item Commands
-\item Services
-\item Databases
-\item Agents
-\item Executors
-\end{itemize}
+\begin{description}
 
-\subsection{Commands}
+\item[Commands] \hfill \\
 Commands are one of the main interface tools for the users. Usually a command is a script, that contacts the server side, and executes the action it was designed for (e.g. upload file and register it in the File Catalog). Other UI functionality is provided by the web interface.
-
-\subsection{Services}
+\item[Services] \hfill \\
 Services are the main back-end component. A service provides a layer between the client running a command, and the Databases/Resources it is using. Example of a service is the FileCatalog, or the SystemAdministrator (which provides a server side of the System Administrator CLI, used for managing services running at a particular server).
-
-\subsection{Databases}
+\item[Databases] \hfill \\
 Databases are the MySQL database structures, designed for specific purposes, so that when installing a database for e.g. FileCatalog, you don't have to install one used for e.g. JobLogging.
-
-\subsection{Agents}
+\item[Agents] \hfill \\
 Agents are active software components which run as independent processes to fulfill one or several system functions. Agents are processes that perform actions periodically. Each cycle agents typically contact a service or look into a DB to check for pending actions, execute the required ones and report back the results. 
-
-\subsection{Executors}
+\item[Executors] \hfill \\
 The Executor framework is designed around two components. The Executor Mind knows how to retrieve, store and dispatch tasks. And Executors are the working processes that know what to do depending on the task type. Each Executor is an independent process that connects to the Mind and waits for tasks to be sent to them by the Mind.
+\end{description}
+
+The new dataset functionality will be in the DatasetManager extension, associated with the FileCatalog  service. Furthermore, new commands will have to be introduced, most of them will also be installed in the FileCatalog CLI.
+%
+%\subsection{Commands}
+%Commands are one of the main interface tools for the users. Usually a command is a script, that contacts the server side, and executes the action it was designed for (e.g. upload file and register it in the File Catalog). Other UI functionality is provided by the web interface.
+%
+%\subsection{Services}
+%Services are the main back-end component. A service provides a layer between the client running a command, and the Databases/Resources it is using. Example of a service is the FileCatalog, or the SystemAdministrator (which provides a server side of the System Administrator CLI, used for managing services running at a particular server).
+%
+%\subsection{Databases}
+%Databases are the MySQL database structures, designed for specific purposes, so that when installing a database for e.g. FileCatalog, you don't have to install one used for e.g. JobLogging.
+%
+%\subsection{Agents}
+%Agents are active software components which run as independent processes to fulfill one or several system functions. Agents are processes that perform actions periodically. Each cycle agents typically contact a service or look into a DB to check for pending actions, execute the required ones and report back the results. 
+%
+%\subsection{Executors}
+%The Executor framework is designed around two components. The Executor Mind knows how to retrieve, store and dispatch tasks. And Executors are the working processes that know what to do depending on the task type. Each Executor is an independent process that connects to the Mind and waits for tasks to be sent to them by the Mind.
+
 
 \section{Current Status}
 
-In DIRAC middleware, there already is a very simple dataset manager. I will revise the work, that was done, and extend it, so that it satisfies the needs of the Auger experiment. Current state will be mentioned in detail in section 4. 
+In DIRAC middleware, there already is a very simple DatasetManager. I will revise the work, that was done, and extend it, so that it satisfies the needs of the Auger experiment. Current state will be mentioned in detail in section 4. 
+
 
 \section{Features}
 
 The required features are:
 
 \begin{enumerate}
-\item cus
+\item Adding a dataset.
+\item Replicating a dataset.
+\item Removing a dataset.
+\item Freezing and releasing a dataset.
+\item Downloading/replicating a fraction of a dataset.
+\item Renaming, moving and copying the dataset object without its files.
+\item Adding managing commands (show files, show status,...)
 \end{enumerate}
 
+
+
+\section{Design and Implementation Constraints}
+The task of this work is not to modify any existing FileCatalog functionality other, than the DatasetManager.It can only suggest and test improvements on the MySQL database, that will improve with dataset functionality. The user interface will be focused on the CLI, web interface will not be a part of this work.
+
+
+
+\newpage
+%\pagebreak 
+\appendix
+\chapter*{Appendix A: Glossary} \label{App:AppendixA}
 \begin{description}
-\item[1] neco
+\item[CLI] \hfill \\
+Command Line Interface
 \end{description}
 
-
-\section{User Classes and Characteristics}
-% add other chapters and sections to suit
 \end{document}
