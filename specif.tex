@@ -19,7 +19,7 @@
 \title{%
 \flushright
 \rule{16cm}{5pt}\vskip1cm
-\Huge{SOFTWARE REQUIREMENTS\\ SPECIFICATION}\\
+\Huge{SOFTWARE REQUIREMENTS SPECIFICATION}\\
 \vspace{2cm}
 for\\
 \vspace{1cm}
@@ -118,7 +118,7 @@ The new dataset functionality will be in the DatasetManager extension, associate
 
 \section{Current Status}
 
-In DIRAC middleware, there already is a very simple DatasetManager. I will revise the work, that was done, and extend it, so that it satisfies the needs of the Auger experiment. Current state will be mentioned in detail in section 3. 
+In DIRAC middleware, there already is a very simple DatasetManager. I will revise the work, that was done, and extend it, so that it satisfies the needs of the Auger experiment. Current state will be mentioned in detail in chapters \ref{chap:UI} and \ref{chap:Details}. 
 
 
 \section{Features}
@@ -140,7 +140,7 @@ The required features are:
 The task of this work is not to modify any existing FileCatalog functionality other, than the DatasetManager.It can only suggest and test improvements on the MySQL database, that will improve with dataset functionality. The user interface will be focused on the CLI, web interface will not be a part of this work.
 
 
-\chapter{User Interface}
+\chapter{User Interface} \label{chap:UI}
 To work with datasets, user must have the DIRAC client installed. There will be two ways, to access dataset functionality
 \begin{itemize}
 \item With the FileCatalog CLI
@@ -206,12 +206,21 @@ Independent command wil take the form of \texttt{dirac-dms-dataset-CMD}, where \
 
 
 
-\chapter{•}
+\chapter{Detailed Behavior} \label{chap:Details}
+
+
+
+\chapter{Other Nonfuctional Requirements}
+
+\section{Performance requirements} \label{sec:Performance}
+As mentioned earlier, all the commands should be interactive. The time the user waits is limited by 10 seconds. If a command shall run longer, it will use the DIRAC Request system. The user wont be informed, when the command finishes, only the state of the dataset will be changed.
+
+\
 
 \newpage
 %\pagebreak 
 \appendix
-\chapter*{Appendix A: Glossary} \label{App:AppendixA}
+\chapter*{Appendix A: Glossary} \label{app:AppendixA}
 \begin{description}
 \item[CLI] \hfill \\
 Command Line Interface
@@ -220,10 +229,11 @@ Command Line Interface
 \newpage
 %\pagebreak 
 \appendix
-\chapter*{Appendix B: To Be Determined} \label{App:AppendixB}
+\chapter*{Appendix B: To Be Determined} \label{app:AppendixB}
 \begin{enumerate}
 \item Shall all the command line commands have their indemendent synonym?
 \item Could the dataset update, and dataset check commands be used for something?
+\item In section \ref{sec:Performance}, I mention the request system, witnout knowing, how it works.
 
 \end{enumerate}
 
