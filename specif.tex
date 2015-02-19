@@ -76,7 +76,7 @@ Once the dataset features will be implemented in DIRAC, it will have all the fun
 
 
 \section{Conventions}
-This document features some terminology which readers may be unfamiliar with. See Appendix A (Glossary) for a list of these terms and their definitions. 
+This document features some terminology which readers may be unfamiliar with. See Appendix A (Glossary) \ref{app:AppendixA} for a list of these terms and their definitions. 
 
 
 
@@ -133,12 +133,12 @@ The required features are:
 \item Freezing and releasing a dataset.
 \item Downloading/replicating a fraction of a dataset.
 \item Renaming, moving and copying the dataset object without its files.
-\item Adding managing commands (show files, show status,...)
+\item Other dataset management (show files, show status,...)
 \end{enumerate}
 
 
 \section{Design and Implementation Constraints}
-The task of this work is not to modify any existing FileCatalog functionality other, than the DatasetManager.It can only suggest and test improvements on the MySQL database, that will improve with dataset functionality. The user interface will be focused on the CLI, web interface will not be a part of this work.
+The task of this work is not to modify any existing FileCatalog functionality other, than the DatasetManager. It can only suggest and test changes on the MySQL database, that will improve the dataset functionality. The user interface will be focused on the CLI, web interface will not be a part of this work.
 
 
 \chapter{User Interface} \label{chap:UI}
@@ -157,28 +157,28 @@ There already is a dataset command in the CLI, which behaves according to the fi
 \texttt{dataset add <dataset_name> <meta_query>} \\
 Make a new dataset from files, returned by the metaquery, or will throw a meaningful error, if it fails.  I will add a \texttt{-f} option, that will instantly freeze the new dataset. This command is already developed, but in need of revision.
 
-\subsection{dataset addFile}
-\texttt{dataset addFile [-f] <dataset_name> <LFN>}
-Manually add files to a frozen dataset. If the \texttt{-f} option is specified, the LFN is path to a local file with LFNs, one line each, that will be added to the dataset.
-
-\subsection{dataset rmFile}
-\texttt{dataset rmFile [-f] <dataset_name> <LFN>}
-Remove files from a frozen dataset. If the \texttt{-f} option is specified, the LFN is path to a local file with LFNs, one line each, that will be removed from the dataset.
+%\subsection{dataset addFile}
+%\texttt{dataset addFile [-f] <dataset_name> <LFN>}
+%Manually add files to a frozen dataset. If the \texttt{-f} option is specified, the LFN is path to a local file with LFNs, one line each, that will be added to the dataset.
+%
+%\subsection{dataset rmFile}
+%\texttt{dataset rmFile [-f] <dataset_name> <LFN>}
+%Remove files from a frozen dataset. If the \texttt{-f} option is specified, the LFN is path to a local file with LFNs, one line each, that will be removed from the dataset.
 
 \subsection{dataset annotate} 
 \texttt{dataset annotate <dataset_name> <annotation>}  \\
-Add annotation to a already existing dataset. This command is already developed, but in need of revision.
+Add annotation to an already existing dataset. This command is already developed, but in need of revision.
 
 \subsection{dataset show}
-\texttt{dataset show [-l] <dataset_name>} \\
+\texttt{dataset show [-l] [<dataset_name>]} \\
 Show existing datasets. The \texttt{-l} option enables long output. This command is already developed.
                
 \subsection{dataset status}
-\texttt{dataset status <dataset_name>} \\
+\texttt{dataset status <dataset_name> [<dataset_name>]*} \\
 Display the dataset status. The functionality is similar to \texttt{dataset show -l}, but it shows only information about one dataset. This command is already developed, but in need of revision.
 
 \subsection{dataset files}
-\texttt{dataset files <dataset_name>} \\
+\texttt{dataset files <dataset_name> [<dataset_name>]*} \\
 Show dataset files. This command is already developed, but in need of revision.
 
 \subsection{dataset remove}
@@ -186,12 +186,12 @@ Show dataset files. This command is already developed, but in need of revision.
 Remove dataset. In case of dynamic dataset, the removal will only affect the dataset declaration, not its files. This command is already developed. In case of frozen dataset, the command will have to cross-reference other frozen datasets and the FileCatalog, then remove files owned only by the dataset specified by the second parameter.
 
 \subsection{dataset check}
-\texttt{dataset check <dataset_name>} \\
-This command is already developed, but deprecated.
+\texttt{dataset check [-u] <dataset_name> [<dataset_name>]*} \\
+Check, if the cached details are still valid. If the \texttt{-u} option is specified, update them in case of invalidity. This command is already developed, but in need of revision.
 
 \subsection{dataset update}
-\texttt{dataset update <dataset_name>} \\
-This command is already developed, but deprecated.
+\texttt{dataset update <dataset_name> [<dataset_name>]*} \\
+Update the cachech dataset details. This command is already developed, but in need of revision.
 
 \subsection{dataset freeze}
 \texttt{dataset freeze <dataset_name>} \\
@@ -206,8 +206,8 @@ Change a frozen dataset into a dynamic dataset. This command is already develope
 Replicate the dataset to a given storage element. If the \texttt{-n} option is specified, the following number will indicate the percentual part of the dataset, that should be replicated.
 
 \subsection{dataset download}
-\texttt{dataset download <dataset_name> [-n num]} \\
-Downloads the wanted dataset to the users local disk. If the \texttt{-n} option is specified, the following number will indicate the percentual part of the dataset, that should be downloaded.
+\texttt{dataset download [-n num] <dataset_name> [<local_dir>]} \\
+Downloads the wanted dataset to the users local disk. If the \texttt{-n} option is specified, the following number will indicate the percentual part of the dataset, that should be downloaded. The size limit will never be exceeded. The \texttt{local_dir} parameter sets the directory on the local disk, where the dataset should be downloaded. If not specified, the current working directory will be used. In the target directory, a new directory will be created, with name same as dataset name, where all the files will be located.
 
 
 \section{Independent commands}
@@ -222,8 +222,8 @@ Since datasets are stored similarly to files in the FileCatalog, they should be 
 \chapter{Detailed Behavior} \label{chap:Details}
 
 %Here I will in detail explain, what each command should do.
-On the client side, the command always starts by getting the correct name for the dataset. If the name i given with whole path, it has to be stripped.
-All the commands are just passed through the FileCatalogHandler, where the credentials are added to the call. In the DatasetManager, the function will first find out who invoked them using the FileCatalogDBs UserAndGroupManagers method \texttt{getUserAndGroupID}.
+On the client side, the command always starts by getting the correct name for the dataset. TODO path. Also, unless otherwise noted, on the end the client side parses the S_OK or S_ERROR response from the server side and prints output.
+All the commands are just passed through the FileCatalogHandler, where the credentials are added to the call. %In the DatasetManager, the function will first find out who invoked them using the FileCatalogDBs UserAndGroupManagers method \texttt{getUserAndGroupID}.
 
 
 \section{dataset add}
@@ -231,8 +231,7 @@ All the commands are just passed through the FileCatalogHandler, where the crede
 %
 \item[On client side] \hfill 
 \begin{enumerate}
-\item Check the metaquery for validity. Valid metaquery is TODO. 
-\item Determin the correct dataset name: if the name given by the parameter has a \texttt{/} character in it, it is treated as a full name.
+\item Check the metaquery for validity. Valid metaquery is a list of restrictions, separated by spaces, formated \texttt{<metaField><operator><metaValue>}, where \texttt{metaField} is name of the metadata, \texttt{metaValue} is its value and \texttt{operator} is one of these operators: \texttt{ [>=,<=,>,<,!=,=]}. 
 \end{enumerate}
 %
 \item[On server side] \hfill 
@@ -247,42 +246,42 @@ All the commands are just passed through the FileCatalogHandler, where the crede
 \end{description}
 
 
-\section{dataset addFile}
-\begin{description}
+%\section{dataset addFile}
+%\begin{description}
+%%
+%\item[On client side] \hfill 
+%\begin{enumerate}
+%\item If \texttt{-f} option, checking, if the local file is present and readable. If OK, then read it and get the files in an array.
+%\item If the second parameter is only a LFN, inserte it in an array to pass it to the RPC call.
+%\end{enumerate}
+%%
+%\item[On server side] \hfill
+%\begin{enumerate}
+%\item Check if dataset is present and is frozen.
+%\item Check if files exist and get their IDs.
+%\item Create and submit correct MySQL insert query.
+%\end{enumerate}
 %
-\item[On client side] \hfill 
-\begin{enumerate}
-\item If \texttt{-f} option, checking, if the local file is present and readable. If OK, then read it and get the files in an array.
-\item If the second parameter is only a LFN, inserte it in an array to pass it to the RPC call.
-\end{enumerate}
+%\end{description}
 %
-\item[On server side] \hfill
-\begin{enumerate}
-\item Check if dataset is present and is frozen.
-\item Check if files exist and get their IDs.
-\item Create and submit correct MySQL insert query.
-\end{enumerate}
-
-\end{description}
-
-
-\section{dataset rmFile}
-\begin{description}
 %
-\item[On client side] \hfill 
-\begin{enumerate}
-\item If \texttt{-f} option, checking, if the local file is present and readable. If OK, then read it and get the files in an array.
-\item If the second parameter is only a LFN, insert it in an array to pass it to the RPC call.
-\end{enumerate}
+%\section{dataset rmFile}
+%\begin{description}
+%%
+%\item[On client side] \hfill 
+%\begin{enumerate}
+%\item If \texttt{-f} option, checking, if the local file is present and readable. If OK, then read it and get the files in an array.
+%\item If the second parameter is only a LFN, insert it in an array to pass it to the RPC call.
+%\end{enumerate}
+%%
+%\item[On server side] \hfill
+%\begin{enumerate}
+%\item Check if dataset is present and is frozen.
+%\item Check if files exist and get their IDs.
+%\item Create and submit correct MySQL delete query.
+%\end{enumerate}
 %
-\item[On server side] \hfill
-\begin{enumerate}
-\item Check if dataset is present and is frozen.
-\item Check if files exist and get their IDs.
-\item Create and submit correct MySQL delete query.
-\end{enumerate}
-
-\end{description}
+%\end{description}
 
 
 \section{dataset annotate} 
@@ -304,59 +303,52 @@ All the commands are just passed through the FileCatalogHandler, where the crede
 \section{dataset show}  
 \begin{description}
 %
-\item[On client side] \hfill
-\begin{enumerate} 
-\item 
-\item
-
-\end{enumerate}
+\item[On client side] the command doesn't do any additional operations.
 %
 \item[On server side] \hfill
 \begin{enumerate} 
-\item 
-\item
+\item Check, if dataset name is specified.
+\item Check, if long output is required. 
+\item Create and submit correct MySQL select query.
 
 \end{enumerate}
 
 \end{description}
-
 
 
 \section{dataset status} 
 \begin{description}
-
 %
 \item[On client side] \hfill
-\begin{enumerate} 
-\item 
-\item
-
+\begin{enumerate}
+\item Check if one or more dataset statuses are wanted and parse them into a field.
 \end{enumerate}
+
 %
 \item[On server side] \hfill
 \begin{enumerate} 
-\item 
-\item
-
+\item Query the DB for statuses.
+\item Parse query output.
 \end{enumerate}
 
 \end{description}
 
 
-
 \section{dataset files} 
 \begin{description}
-
 %
 \item[On client side] \hfill
 \begin{enumerate} 
-\item
-
+\item Check if one or more dataset statuses are wanted and parse them into a field.
+\item After the RPC call returns, determine, which file ID corresponds with which file name.
 \end{enumerate}
 %
 \item[On server side] \hfill
 \begin{enumerate} 
-\item
+\item Get wanted dataset IDs.
+\item Parse the IDs. 
+\item Query the DB for files.
+\item Query the DB for file names.
 
 \end{enumerate}
 
@@ -390,13 +382,16 @@ All the commands are just passed through the FileCatalogHandler, where the crede
 %
 \item[On client side] \hfill
 \begin{enumerate} 
-\item
+\item Check if one or more dataset statuses are wanted and parse them into a field.
 
 \end{enumerate}
 %
 \item[On server side] \hfill
 \begin{enumerate} 
-\item
+\item Query the DB for dataset details.
+\item Get the actual details.
+\item Compare the details. Return the result.
+\item If \texttt{-u} option specified, update the details.
 
 \end{enumerate}
 
@@ -410,13 +405,14 @@ All the commands are just passed through the FileCatalogHandler, where the crede
 %
 \item[On client side] \hfill
 \begin{enumerate} 
-\item
+\item Check if one or more dataset statuses are wanted and parse them into a field.
 
 \end{enumerate}
 %
 \item[On server side] \hfill
 \begin{enumerate} 
-\item
+\item Get the updated dataset details.
+\item Update the details with valid details.
 
 \end{enumerate}
 
@@ -428,15 +424,13 @@ All the commands are just passed through the FileCatalogHandler, where the crede
 \begin{description}
 
 %
-\item[On client side] \hfill
-\begin{enumerate} 
-\item
-
-\end{enumerate}
+\item[On client side] the command doesn't do any additional operations.
 %
 \item[On server side] \hfill
 \begin{enumerate} 
-\item
+\item Get dataset files.
+\item Insert entries into the DB.
+\item Change dataset status.
 
 \end{enumerate}
 
@@ -448,15 +442,14 @@ All the commands are just passed through the FileCatalogHandler, where the crede
 \begin{description}
 
 %
-\item[On client side] \hfill
-\begin{enumerate} 
-\item
+\item[On client side] the command doesn't do any additional operations.
 
-\end{enumerate}
 %
 \item[On server side] \hfill
 \begin{enumerate} 
-\item
+\item Change dataset status
+\item Remove file entries from the table.
+\item Get updated dataset details and update the database entry.
 
 \end{enumerate}
 
@@ -469,14 +462,17 @@ All the commands are just passed through the FileCatalogHandler, where the crede
 
 %
 \item[On client side] \hfill
-\begin{enumerate} 
-\item
-
+\begin{enumerate}
+\item When the RPC call comes back, check if the size of the files to be replecated is greater than \texttt{MAX_REPL_FILES}.
+\item If yes, create a request (or more), to replicate and register those files.
+\item If not, replicate them localy using the \texttt{dirac.replicateFile} function and inform about its progress.
 \end{enumerate}
 %
 \item[On server side] \hfill
 \begin{enumerate} 
-\item
+\item Get the list of the files of the dataset.
+\item If \texttt{-n} option is specified, determine which files should be replicated.
+\item Send back the list of files including the whole size.
 
 \end{enumerate}
 
@@ -490,13 +486,15 @@ All the commands are just passed through the FileCatalogHandler, where the crede
 %
 \item[On client side] \hfill
 \begin{enumerate} 
-\item
+\item Create the dataset named directory. 
+\item When the query returns with file names, call for each filename the \texttt{getFile(LFN)} function. If there are more than one files, inform about the operation progress.
 
 \end{enumerate}
 %
 \item[On server side] \hfill
 \begin{enumerate} 
-\item
+\item Get dataset files based on the dataset name, sorted if \texttt{-n} specified.
+\item If \texttt{-n} option specified, go through the list of files and pick those, so that the percentual limit is hit as close as it can. Never exceed the limit.
 
 \end{enumerate}
 
@@ -510,7 +508,7 @@ As mentioned earlier, all the commands should be interactive. The time the user 
 
 
 \section{Safety requirements}
-The new functionality will not affect the safety of using DIRAC as a whole. Data-loss will occur, when removing a frozen dataset. The dataset manager will not have access to users local hard drive.
+The new functionality will not affect the safety of using DIRAC as a whole. Data-loss will occur, when removing a frozen dataset. The dataset manager will not have removal access to users local hard drive.
 
 
 \section{Security requirements}
@@ -547,6 +545,8 @@ deadline for thesis handin & 22.05.2015 \\
 Command Line Interface
 \item[LFN] \hfill \\
 Logical File Name
+\item[S_OK and S_ERROR] \hfill \\
+DIRACs internal result dictionaries.
 \end{description}
 
 \newpage
@@ -554,12 +554,11 @@ Logical File Name
 \appendix
 \chapter*{Appendix B: To Be Determined} \label{app:AppendixB}
 \begin{enumerate}
-\item Shall all the command line commands have their indemendent synonym?
-\item Could the dataset update, and dataset check commands be used for something?
-\item In section \ref{sec:Performance}, I mention the request system, witnout knowing, how it works.
+\item Shall all the command line commands have their indemendent synonym? Shall any?
+\item In section \ref{sec:Performance}, I mention the request system, witnout knowing, how it works. A: Got a reference to manual 19/02
 \item Any other commands the datasets should respond to in \ref{sec:OtherFunc}?
-\item What is a valid query \ref{chap:Details}?
-\item How shall I identify a dataset \ref{chap:Details}?
+\item What is a valid query \ref{chap:Details}? A: [<metaField>=<metaValue> ]+ where the " " stands for $and$.
+\item How shall I identify a dataset \ref{chap:Details}? A: With its complete path.
 \end{enumerate}
 
 \end{document}
