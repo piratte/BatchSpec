@@ -157,6 +157,14 @@ There already is a dataset command in the CLI, which behaves according to the fi
 \texttt{dataset add <dataset_name> <meta_query>} \\
 Make a new dataset from files, returned by the metaquery, or will throw a meaningful error, if it fails.  I will add a \texttt{-f} option, that will instantly freeze the new dataset. This command is already developed, but in need of revision.
 
+\subsection{dataset addFile}
+\texttt{dataset addFile [-f] <dataset_name> <LFN>}
+Manually add files to a frozen dataset. If the \texttt{-f} option is specified, the LFN is path to a local file with LFNs, one line each, that will be added to the dataset.
+
+\subsection{dataset rmFile}
+\texttt{dataset rmFile [-f] <dataset_name> <LFN>}
+Remove files from a frozen dataset. If the \texttt{-f} option is specified, the LFN is path to a local file with LFNs, one line each, that will be removed from the dataset.
+
 \subsection{dataset annotate} 
 \texttt{dataset annotate <dataset_name> <annotation>}  \\
 Add annotation to a already existing dataset. This command is already developed, but in need of revision.
@@ -206,10 +214,293 @@ Downloads the wanted dataset to the users local disk. If the \texttt{-n} option 
 Independent command wil take the form of \texttt{dirac-dms-dataset-CMD}, where \texttt{CMD} will be replaced with the first parameter, of the dataset command from the FileCatalog CLI. 
 
 
+\section{Other functionality} \label{sec:OtherFunc}
+Since datasets are stored similarly to files in the FileCatalog, they should be incorporated in the output of the FileCatalog's CLI \texttt{ls} command. They should also respond to commands such as \texttt{chown, chmod, chgrp, replicas} correctly. When triing to manipulate a dataset in any other way, e.g. using a \texttt{rm} command on it, it should respond with a understandable error.
+
+
 
 \chapter{Detailed Behavior} \label{chap:Details}
 
+%Here I will in detail explain, what each command should do.
+On the client side, the command always starts by getting the correct name for the dataset. If the name i given with whole path, it has to be stripped.
+All the commands are just passed through the FileCatalogHandler, where the credentials are added to the call. In the DatasetManager, the function will first find out who invoked them using the FileCatalogDBs UserAndGroupManagers method \texttt{getUserAndGroupID}.
 
+
+\section{dataset add}
+\begin{description}
+%
+\item[On client side] \hfill 
+\begin{enumerate}
+\item Check the metaquery for validity. Valid metaquery is TODO. 
+\item Determin the correct dataset name: if the name given by the parameter has a \texttt{/} character in it, it is treated as a full name.
+\end{enumerate}
+%
+\item[On server side] \hfill 
+\begin{enumerate}
+\item Check the credentials.
+\item Get parameters for MySQL insertion (size, number of files, hash).
+\item Determin the StatusID depending on which type of dataset we are adding by a MySQL query. 
+\item Check the path.
+\item Insert into DB.
+\end{enumerate}
+
+\end{description}
+
+
+\section{dataset addFile}
+\begin{description}
+%
+\item[On client side] \hfill 
+\begin{enumerate}
+\item If \texttt{-f} option, checking, if the local file is present and readable. If OK, then read it and get the files in an array.
+\item If the second parameter is only a LFN, inserte it in an array to pass it to the RPC call.
+\end{enumerate}
+%
+\item[On server side] \hfill
+\begin{enumerate}
+\item Check if dataset is present and is frozen.
+\item Check if files exist and get their IDs.
+\item Create and submit correct MySQL insert query.
+\end{enumerate}
+
+\end{description}
+
+
+\section{dataset rmFile}
+\begin{description}
+%
+\item[On client side] \hfill 
+\begin{enumerate}
+\item If \texttt{-f} option, checking, if the local file is present and readable. If OK, then read it and get the files in an array.
+\item If the second parameter is only a LFN, insert it in an array to pass it to the RPC call.
+\end{enumerate}
+%
+\item[On server side] \hfill
+\begin{enumerate}
+\item Check if dataset is present and is frozen.
+\item Check if files exist and get their IDs.
+\item Create and submit correct MySQL delete query.
+\end{enumerate}
+
+\end{description}
+
+
+\section{dataset annotate} 
+\begin{description}
+%
+\item[On client side] \hfill
+\begin{enumerate}
+\item Join parameters to form a string
+\end{enumerate}
+%
+\item[On server side] \hfill
+\begin{enumerate}
+\item Check, if dataset exists.
+\item Create and submit correct MySQL update query.
+\end{enumerate}
+\end{description}
+
+
+\section{dataset show}  
+\begin{description}
+%
+\item[On client side] \hfill
+\begin{enumerate} 
+\item 
+\item
+
+\end{enumerate}
+%
+\item[On server side] \hfill
+\begin{enumerate} 
+\item 
+\item
+
+\end{enumerate}
+
+\end{description}
+
+
+
+\section{dataset status} 
+\begin{description}
+
+%
+\item[On client side] \hfill
+\begin{enumerate} 
+\item 
+\item
+
+\end{enumerate}
+%
+\item[On server side] \hfill
+\begin{enumerate} 
+\item 
+\item
+
+\end{enumerate}
+
+\end{description}
+
+
+
+\section{dataset files} 
+\begin{description}
+
+%
+\item[On client side] \hfill
+\begin{enumerate} 
+\item
+
+\end{enumerate}
+%
+\item[On server side] \hfill
+\begin{enumerate} 
+\item
+
+\end{enumerate}
+
+\end{description}
+
+
+
+\section{dataset remove} 
+\begin{description}
+
+%
+\item[On client side] \hfill
+\begin{enumerate} 
+\item
+
+\end{enumerate}
+%
+\item[On server side] \hfill
+\begin{enumerate} 
+\item
+
+\end{enumerate}
+
+\end{description}
+
+
+
+\section{dataset check} 
+\begin{description}
+
+%
+\item[On client side] \hfill
+\begin{enumerate} 
+\item
+
+\end{enumerate}
+%
+\item[On server side] \hfill
+\begin{enumerate} 
+\item
+
+\end{enumerate}
+
+\end{description}
+
+
+
+\section{dataset update} 
+\begin{description}
+
+%
+\item[On client side] \hfill
+\begin{enumerate} 
+\item
+
+\end{enumerate}
+%
+\item[On server side] \hfill
+\begin{enumerate} 
+\item
+
+\end{enumerate}
+
+\end{description}
+
+
+
+\section{dataset freeze} 
+\begin{description}
+
+%
+\item[On client side] \hfill
+\begin{enumerate} 
+\item
+
+\end{enumerate}
+%
+\item[On server side] \hfill
+\begin{enumerate} 
+\item
+
+\end{enumerate}
+
+\end{description}
+
+
+
+\section{dataset release} 
+\begin{description}
+
+%
+\item[On client side] \hfill
+\begin{enumerate} 
+\item
+
+\end{enumerate}
+%
+\item[On server side] \hfill
+\begin{enumerate} 
+\item
+
+\end{enumerate}
+
+\end{description}
+
+
+
+\section{dataset replicate} 
+\begin{description}
+
+%
+\item[On client side] \hfill
+\begin{enumerate} 
+\item
+
+\end{enumerate}
+%
+\item[On server side] \hfill
+\begin{enumerate} 
+\item
+
+\end{enumerate}
+
+\end{description}
+
+
+
+\section{dataset download} 
+\begin{description}
+
+%
+\item[On client side] \hfill
+\begin{enumerate} 
+\item
+
+\end{enumerate}
+%
+\item[On server side] \hfill
+\begin{enumerate} 
+\item
+
+\end{enumerate}
+
+\end{description}
 
 \chapter{Other Nonfunctional Requirements}
 
@@ -254,6 +545,8 @@ deadline for thesis handin & 22.05.2015 \\
 \begin{description}
 \item[CLI] \hfill \\
 Command Line Interface
+\item[LFN] \hfill \\
+Logical File Name
 \end{description}
 
 \newpage
@@ -264,7 +557,9 @@ Command Line Interface
 \item Shall all the command line commands have their indemendent synonym?
 \item Could the dataset update, and dataset check commands be used for something?
 \item In section \ref{sec:Performance}, I mention the request system, witnout knowing, how it works.
-
+\item Any other commands the datasets should respond to in \ref{sec:OtherFunc}?
+\item What is a valid query \ref{chap:Details}?
+\item How shall I identify a dataset \ref{chap:Details}?
 \end{enumerate}
 
 \end{document}
